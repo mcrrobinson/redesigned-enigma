@@ -22,7 +22,7 @@ function populate_with_content(file_name, buffer) {
     var xhr = new XMLHttpRequest();
     xhr.addEventListener('load', function(){
         var file_div = document.getElementById('content');
-        file_div.innerHTML += JSON.parse(this.responseText);
+        file_div.innerHTML = JSON.parse(this.responseText);
     });
     xhr.open('GET', '/api/' + file_name + '/content/' + buffer, true);
     xhr.send();

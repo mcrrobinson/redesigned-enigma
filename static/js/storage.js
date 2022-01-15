@@ -12,6 +12,9 @@ class Storage {
     get_column_types(){
         return this.storage.getItem('column_types');
     }
+    get_file_type(){
+        return this.storage.getItem('file_type');
+    }
     set_delimiter(delimiter) {
         return this.storage.setItem('delimiter', delimiter);
     }
@@ -20,5 +23,8 @@ class Storage {
     }
     set_column_types(column_types){
         return this.storage.setItem('column_types', column_types);
+    }
+    set_file_type(file_type){
+        return this.storage.setItem('file_type', file_type);
     }
 }

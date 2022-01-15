@@ -1,17 +1,193 @@
 <html>
 
 <head>
-
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="/static/css/styles.css" rel="stylesheet">
 </head>
 
 <body>
-    <div style="white-space: pre-line" id="content"></div>
+
+    <div class="container">
+        <h1>{{file}}</h1>
+        <hr>
+        <div class="card">
+            <div class="card-header">File Metadata</div>
+            <div class="card-body">
+                <h5 class="card-title">File Metadata</h5>
+                <form class="row g-3 needs-validation" novalidate>
+                    <div class="col-md-4">
+                        <label for="csv_delimiter_value" class="form-label">Delimiter</label>
+                        <input maxlength="1" type="text" class="form-control" id="csv_delimiter_value"
+                            placeholder="Enter a delimiter..." required>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" value="csv_file_type" type="radio"
+                                name="file_type_radio_button" id="flexRadioDefault1" checked>
+                            <label class="form-check-label" for="flexRadioDefault1">CSV File</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" value="sql_file_type" type="radio"
+                                name="file_type_radio_button" id="flexRadioDefault2">
+                            <label class="form-check-label" for="flexRadioDefault2">SQL File</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button id="modify_metadata_button" class="btn btn-primary" type="button">Update</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card">
+                <div class="card-header">File Content</div>
+                <div class="card-body" style="white-space: pre-line" id="content">
+                </div>
+            </div>
+        </div>
+        <menu class="menu">
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i> <span
+                        class="menu-text">Open</span> </button>
+            </li>
+            <li class="menu-item disabled">
+                <button type="button" class="menu-btn"> <span class="menu-text">Open in New Window</span> </button>
+            </li>
+            <li class="menu-separator"></li>
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-reply"></i> <span class="menu-text">Reply</span>
+                </button>
+            </li>
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-star"></i> <span
+                        class="menu-text">Favorite</span> </button>
+            </li>
+            <li class="menu-item submenu">
+                <button type="button" class="menu-btn"> <i class="fa fa-users"></i> <span
+                        class="menu-text">Social</span> </button>
+                <menu class="menu">
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-comment"></i> <span
+                        class="menu-text">Comment</span> </button>
+            </li>
+            <li class="menu-item submenu">
+                <button type="button" class="menu-btn"> <i class="fa fa-share"></i> <span class="menu-text">Share</span>
+                </button>
+                <menu class="menu">
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-twitter"></i> <span
+                        class="menu-text">Twitter</span> </button>
+            </li>
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-facebook-official"></i> <span
+                        class="menu-text">Facebook</span> </button>
+            </li>
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-google-plus"></i> <span class="menu-text">Google
+                        Plus</span> </button>
+            </li>
+            <li class="menu-item">
+                <button type="button" class="menu-btn"> <i class="fa fa-envelope"></i> <span
+                        class="menu-text">Email</span> </button>
+            </li>
+        </menu>
+        </li>
+        </menu>
+        </li>
+        <li class="menu-separator"></li>
+        <li class="menu-item">
+            <button type="button" class="menu-btn"> <i class="fa fa-download"></i> <span class="menu-text">Save</span>
+            </button>
+        </li>
+        <li class="menu-item">
+            <button type="button" class="menu-btn"> <i class="fa fa-edit"></i> <span class="menu-text">Rename</span>
+            </button>
+        </li>
+        <li class="menu-item">
+            <button type="button" class="menu-btn"> <i class="fa fa-trash"></i> <span class="menu-text">Delete</span>
+            </button>
+        </li>
+        </menu>
 </body>
 <script src="/static/js/storage.js"></script>
 <script src="/static/js/requests.js"></script>
+<script src="/static/js/helper.js"></script>
 <script>
-    (function() {
-        populate_with_content("{{file}}", 0)
-    })();
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        var storage = new Storage();
+        populate_with_content("{{file}}", 0);
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+
+        var submit = document.getElementById('modify_metadata_button');
+        var csv_delimiter_value = document.getElementById('csv_delimiter_value')
+        submit.addEventListener('click', function (event) {
+            Array.prototype.slice.call(document.querySelectorAll('.needs-validation')).forEach(function (
+                form) {
+                const radioButtons = form.querySelectorAll('input[name="file_type_radio_button"]');
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation();
+                } else {
+                    var file_type = return_selected_radio_button(radioButtons);
+
+                    storage.set_file_type(file_type);
+                    storage.set_delimiter(csv_delimiter_value.value);
+
+                    if (file_type === 'csv_file_type') {
+                        var content = document.getElementById('content');
+                        var buffer = content.innerHTML.split('\n');
+                        var table = document.createElement('table');
+                        table.classList.add('table');
+
+                        var table_body = document.createElement('tbody');
+
+
+                        var first_row_length = buffer[0].split(csv_delimiter_value.value);
+                        for (var row = 0; row < buffer.length; row++) {
+
+                            var table_row = document.createElement('tr');
+                            table_row.addEventListener('contextmenu', function (event) {
+                                var menu = document.querySelector('.menu');
+
+                                event.preventDefault();
+                                menu.style.left = event.pageX + 'px';
+                                menu.style.top = event.pageY + 'px';
+                                menu.classList.add('show-menu');
+                                document.addEventListener('click', function (event) {
+                                    menu.classList.remove('show-menu');
+                                    document.removeEventListener('click', this);
+                                }, false);
+                            })
+                            var cols = buffer[row].split(csv_delimiter_value.value);
+
+                            if (cols.length != first_row_length.length) {
+                                console.warn("Row " + row +
+                                    " has a different number of columns than the first row.");
+                                continue;
+                            }
+
+                            for (var col = 0; col < cols.length; col++) {
+                                var table_col = document.createElement('td');
+                                table_col.innerHTML = cols[col];
+                                table_row.appendChild(table_col);
+                            }
+                            table_body.appendChild(table_row);
+                        }
+                        content.innerHTML = '';
+                        table.appendChild(table_body);
+                        content.appendChild(table);
+                    }
+                }
+                form.classList.add('was-validated')
+            });
+        });
+    })()
 </script>
+
 </html>
