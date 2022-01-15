@@ -4,6 +4,7 @@
     <link href="/static/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="/static/css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 </head>
 
 <body>
@@ -47,74 +48,99 @@
                 </div>
             </div>
         </div>
-        <menu class="menu">
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-folder-open"></i> <span
-                        class="menu-text">Open</span> </button>
-            </li>
-            <li class="menu-item disabled">
-                <button type="button" class="menu-btn"> <span class="menu-text">Open in New Window</span> </button>
-            </li>
-            <li class="menu-separator"></li>
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-reply"></i> <span class="menu-text">Reply</span>
-                </button>
-            </li>
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-star"></i> <span
-                        class="menu-text">Favorite</span> </button>
-            </li>
-            <li class="menu-item submenu">
-                <button type="button" class="menu-btn"> <i class="fa fa-users"></i> <span
-                        class="menu-text">Social</span> </button>
-                <menu class="menu">
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-comment"></i> <span
-                        class="menu-text">Comment</span> </button>
-            </li>
-            <li class="menu-item submenu">
-                <button type="button" class="menu-btn"> <i class="fa fa-share"></i> <span class="menu-text">Share</span>
-                </button>
-                <menu class="menu">
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-twitter"></i> <span
-                        class="menu-text">Twitter</span> </button>
-            </li>
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-facebook-official"></i> <span
-                        class="menu-text">Facebook</span> </button>
-            </li>
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-google-plus"></i> <span class="menu-text">Google
-                        Plus</span> </button>
-            </li>
-            <li class="menu-item">
-                <button type="button" class="menu-btn"> <i class="fa fa-envelope"></i> <span
-                        class="menu-text">Email</span> </button>
-            </li>
-        </menu>
-        </li>
-        </menu>
-        </li>
-        <li class="menu-separator"></li>
+    </div>
+    <menu class="menu">
         <li class="menu-item">
-            <button type="button" class="menu-btn"> <i class="fa fa-download"></i> <span class="menu-text">Save</span>
-            </button>
+            <ul id="contextMenu" class="dropdown-menu" role="menu"
+                style="display: none">
+                <li><a tabindex="-1" href="#">Action</a></li>
+                <li><a tabindex="-1" href="#">Another action</a></li>
+                <li><a tabindex="-1" href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li><a tabindex="-1" href="#">Separated link</a></li>
+            </ul>
+          <button id="row_delete_button" type="button" class="btn btn-danger menu-btn"> <i class="fa fa-trash"></i> <span class="menu-text">Delete</span></button>
         </li>
-        <li class="menu-item">
-            <button type="button" class="menu-btn"> <i class="fa fa-edit"></i> <span class="menu-text">Rename</span>
-            </button>
-        </li>
-        <li class="menu-item">
-            <button type="button" class="menu-btn"> <i class="fa fa-trash"></i> <span class="menu-text">Delete</span>
-            </button>
-        </li>
-        </menu>
+      </menu>
 </body>
 <script src="/static/js/storage.js"></script>
 <script src="/static/js/requests.js"></script>
 <script src="/static/js/helper.js"></script>
 <script>
+    var lastSelectedRow;
+    var menu = document.querySelector('.menu');
+    var row_delete_button = document.getElementById('row_delete_button');
+
+    row_delete_button.addEventListener('click', function(event){
+        var rows = document.querySelectorAll('.selected');
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            row.parentNode.removeChild(row);
+        };
+    });
+
+    function onContextMenu(e){
+        e.preventDefault();
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+        menu.classList.add('show-menu');
+        document.addEventListener('click', function(){
+            menu.classList.remove('show-menu');
+            document.removeEventListener('click', this);
+        }, false);
+    }  
+
+    // disable text selection
+    document.onselectstart = function () {
+        return false;
+    }
+
+    function RowClick(trs, currenttr, lock) {
+        if (window.event.ctrlKey) {
+            toggleRow(currenttr);
+        }
+
+        if (window.event.button === 0) {
+            if (!window.event.ctrlKey && !window.event.shiftKey) {
+                clearAll(trs);
+                toggleRow(currenttr);
+            }
+
+            if (window.event.shiftKey) {
+                selectRowsBetweenIndexes(trs, [lastSelectedRow.rowIndex, currenttr.rowIndex])
+            }
+        }
+    }
+
+    function toggleRow(row) {
+        if (row.classList.contains('selected')) {
+            row.classList.remove('selected');
+            row.removeEventListener('contextmenu', onContextMenu);
+        } else {
+            row.classList.add('selected');
+            row.addEventListener('contextmenu', onContextMenu, false);
+        }
+        lastSelectedRow = row;
+    }
+
+    function selectRowsBetweenIndexes(trs, indexes) {
+        indexes.sort(function (a, b) {
+            return a - b;
+        });
+
+        for (var i = indexes[0]; i <= indexes[1]; i++) {
+            trs[i].className = 'selected';
+            trs[i].addEventListener('contextmenu', onContextMenu, false);
+        }
+    }
+
+    function clearAll(trs) {
+        for (var i = 0; i < trs.length; i++) {
+            trs[i].className = '';
+            trs[i].removeEventListener('contextmenu', onContextMenu);
+        }
+    }
+
     // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function () {
         'use strict'
@@ -152,18 +178,6 @@
                         for (var row = 0; row < buffer.length; row++) {
 
                             var table_row = document.createElement('tr');
-                            table_row.addEventListener('contextmenu', function (event) {
-                                var menu = document.querySelector('.menu');
-
-                                event.preventDefault();
-                                menu.style.left = event.pageX + 'px';
-                                menu.style.top = event.pageY + 'px';
-                                menu.classList.add('show-menu');
-                                document.addEventListener('click', function (event) {
-                                    menu.classList.remove('show-menu');
-                                    document.removeEventListener('click', this);
-                                }, false);
-                            })
                             var cols = buffer[row].split(csv_delimiter_value.value);
 
                             if (cols.length != first_row_length.length) {
@@ -180,6 +194,14 @@
                             table_body.appendChild(table_row);
                         }
                         content.innerHTML = '';
+
+                        var table_rows = table_body.querySelectorAll('tr')
+                        table_rows.forEach(function (tr) {
+                            tr.onmousedown = function (event) {
+                                RowClick(table_rows, this, false);
+                            }
+                        });
+
                         table.appendChild(table_body);
                         content.appendChild(table);
                     }
